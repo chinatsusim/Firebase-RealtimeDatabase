@@ -1,0 +1,167 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>絵本検索サービス
+    </title>
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300&display=swap" rel="stylesheet">
+    
+</head>
+
+<body>
+        <div class="chosei">
+            <div class="intro">
+                <h1>絵本検索サービス</h1>
+                <p class="title_info">図書館や本屋さんに行く前のメモに使ってね！</p>
+                <form action="" id="search" style="display:none;">
+                    <input type="text" id="keyword" placeholder="例）エリック・カール">
+                    <button id="submit">探す</button>
+                </form>
+
+                <div id="stored">
+                    <h2>保存した書籍：</h2>
+                    <ul>
+                        <p id="nothing">まだありません</p>
+                        <li id="bookslist" style="display: none"></li>
+                    </ul>
+                </div>
+                
+            </div>  
+
+            <main>
+            
+                <div id="key"></div>
+                <div id="books"></div>
+
+            </main>
+
+            <footer class="old">© 2024 NEM</footer>
+        </div>
+    <script>
+        $("form").fadeIn(500);
+
+        $('#submit').on('click',function(e){
+            e.preventDefault();
+            let input_query = $("#keyword").val();
+            console.log(input_query);
+
+
+            $("#key").html('「'+ input_query+'」に関する書籍の検索結果：');
+            $("footer").removeClass("old").addClass("new");
+
+
+            $.getJSON(
+                "https://www.googleapis.com/books/v1/volumes?q=" + encodeURIComponent(input_query) + "&maxResults=30&startIndex=0",
+                function(data){
+                    console.dir(data);
+                
+                    let view = '';
+
+                    for(let i=0; i<data.items.length; i++){
+                        let item = data.items[i]; //itemsのひとつひとつ
+                        let description = item.volumeInfo.description;
+                        let count = 80;
+
+                        view += '<div class="bookinfo">';
+                        view += '<h2>'+ item.volumeInfo.title + '</h2>';
+                        
+                        if (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.smallThumbnail) {
+                            view += '<div><img src="' +  item.volumeInfo.imageLinks.smallThumbnail + '"></div>';
+                         }
+                         else {
+                            view += '<div class="img_no">※イメージなし</div>'
+                         }
+
+                         view += '<ul><li>著者：'+ item.volumeInfo.authors + '</li>';
+
+                         if (description==null){
+                            view += '<div class="description">説明がありません。</div>'
+                         }
+                         else {
+                            if (description.length > count) {
+                                let showText = description.substring(0, count);
+                                let insertText = showText += '...(続きを読む)';
+                                view += '<div class="description">' + insertText + '</div>';
+                            } else {
+                                view += '<div class="description">' + description + '</div>';
+                            }
+                        } 
+
+                         
+                        view += '<button class="add" data-title="'+ item.volumeInfo.title + '" data-author="' + item.volumeInfo.authors + '" data-isbn="'+ item.volumeInfo.industryIdentifiers[0].identifier +'">メモ追加</button>';
+                        view += '</div>';
+                    }
+
+                    $("#books").html(view);
+
+                }
+            
+            );
+        });
+
+        let datetime = new Date();
+        let year = datetime.getFullYear();
+        let month = datetime.getMonth()+1;
+        let day = datetime.getDate();
+
+        //  メモリストに追加する処理
+        $("#books").on('click','.add',function(){
+            let title = $(this).data('title');
+            let author = $(this).data('author');
+            let isbn = $(this).data('isbn');
+            let books = JSON.parse(localStorage.getItem("books")) || []; // 配列booksを呼び出す
+            books.push({ title: title, author: author, isbn:isbn, date: year + '/' + month + '/' + day }); //booksに値を格納する。
+            localStorage.setItem("books", JSON.stringify(books)); //booksの内容をローカルストレージに保存する。
+            $("#nothing").hide();
+            $("#bookslist").show();
+            $("#bookslist").append('<li>'+isbn + '　|　' +title + '　/　' + author + '　('+ year +'/'+ month + '/' + day +'追加)' +'<button class="clear" data-title="'+title +'" data-author=' + author +'" data-isbn=' + isbn + '">削除</button></li>');
+        });
+
+        // 取り除く処理
+        $("#bookslist").on('click','.clear',function(){
+            let removeTitle = $(this).data('title');
+            let books = JSON.parse(localStorage.getItem("books")) || []; // 配列booksを呼び出す
+
+            books = books.filter(function(book){
+                return book.title !== removeTitle;
+            });
+
+            localStorage.setItem("books", JSON.stringify(books)); 
+            $(this).parent().remove();
+            
+            if($('#bookslist li').length===0){
+                $("#nothing").show();
+                $("#bookslist").hide();
+            }
+        });
+
+        // リロードしても書籍情報が再読み込みされる関数を作成
+
+        function displayBookList(){
+            let books = JSON.parse(localStorage.getItem("books")) || [];
+            if(books.length>0){
+                $("#nothing").hide();
+                $("#bookslist").show();
+                for (let i=0; i<books.length;i++){
+                    let book = books[i];
+                    $("#bookslist").append('<li>'+book.isbn + '　|　' +book.title + '　/　' + book.author + '　('+ book.date +'追加)' +'<button class="clear" data-title="'+book.title +'" data-author=' + book.author +'" data-isbn=' + book.isbn + '">削除</button></li>');
+                }
+            } else {
+                $("#nothing").show();
+                $("#bookslist").hide();
+            }
+        }
+
+        $(document).ready(function() {
+            displayBookList();
+        });
+        
+    </script>
+</body>
+
+</html>
