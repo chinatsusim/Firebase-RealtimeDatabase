@@ -52,18 +52,20 @@ main {
 }
 
 .all_container{
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+
 }
 
 .container{
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
+  width: 100%!important;
+  margin:auto;
 }
 
 .msg {
-  max-width: 60%;
+  max-width: 64%;
   padding: 10px 20px;
   border-radius: 20px;
   font-size: 14px;
@@ -74,36 +76,31 @@ main {
   border: 2px solid #000;
   background-color: #ffffff;
   border-top-left-radius: 0;
-  float:left;
   color:#000;
+  order: 1;
 }
 
 .msg-right {
   border: 2px solid #000;
   background-color: rgb(223, 189, 40);
   color: #000;
-  float: right;
   border-top-right-radius: 0;
+  order: 2;
 }
 
 .date-left {
   font-size: 10px;
   color: #000;
   font-weight: 600;
-  float:left;
+  order: 2;/
 }
 
 .date-right {
   font-size: 10px;
   color: #000;
   font-weight: 600;
-  float:right;
+  order: 1;
 }
-
-.float_clear{
-  clear: both;
-}
-
 
 footer {
   position: fixed;
