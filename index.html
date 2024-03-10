@@ -147,26 +147,23 @@
       const key  = data.key;
       //表示用テキスト・HTMLを作成
 
-      let h = '<div class="all_container-">'
+      let h = '<div class="container-left">'
           // h += '<p class="uname">'
           // h += msg.uname;
           // h += '</p>'
-          h += '<div class="container">'
           h += '<p class="msg msg-left">';
           h += msg.text;
           h += '</p>';
           h += '<p class="date-left">';
           h += msg.date;
-          h += '</p></div></div><div class="bms_clear"></div>';
+          h += '</p></div>';
       
-      let k = '<div class="all_container">'
-          k += '<div class="container">'
+      let k = '<div class="container-right">'
           k += '<p class="date-right">';
           k += msg.date;
           k += '<p class="msg msg-right">';
           k += msg.text;
-          k += '</p>';
-          k += '</p></div></div><div class="bms_clear"></div>'; 
+          k += '</p></div>';
       
       if (msg.uname=='AI'){
         let message = $(h).hide();
